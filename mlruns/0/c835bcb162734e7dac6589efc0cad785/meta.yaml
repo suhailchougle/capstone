@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/SohailChougle/Files/capstone/mlruns/0/c835bcb162734e7dac6589efc0cad785/artifacts
+end_time: 1756806082776
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c835bcb162734e7dac6589efc0cad785
+run_name: sentiment_classifier_training
+run_uuid: c835bcb162734e7dac6589efc0cad785
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1756806078830
+status: 3
+tags: []
+user_id: suref
