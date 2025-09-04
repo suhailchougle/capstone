@@ -4,7 +4,7 @@ import pandas as pd
 import os
 from sklearn.feature_extraction.text import CountVectorizer
 import yaml
-from src.logger import logging
+import logging
 import pickle
 
 
