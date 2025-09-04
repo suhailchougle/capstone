@@ -3,7 +3,7 @@
 import json
 import mlflow
 import logging
-from src.logger import logging
+import logging
 import os
 import dagshub
 

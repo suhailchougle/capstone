@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 from sklearn.linear_model import LogisticRegression
 import yaml
-from src.logger import logging
+import logging
 import os
 import mlflow
 from mlflow.models import infer_signature
