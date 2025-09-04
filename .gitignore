@@ -208,3 +208,8 @@ __marimo__/
 
 
 local_s3/
+# Ignore all model files
+models/*.pkl
+
+# Don't ignore DVC files
+!models/*.dvc
