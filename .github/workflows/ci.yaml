@@ -33,7 +33,7 @@ jobs:
 
       - name: run pipeline
         env:
-          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
+          CAPSTONE_TEST: ${{ secrets.CASPTONE_TEST_DAGSHUB }}
         run: |
           dvc repro
 
