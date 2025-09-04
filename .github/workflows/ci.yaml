@@ -1,15 +1,27 @@
+name: DVC Pipeline
+
+# Define when this workflow will run
+on:
+  push:
+    branches: [ main, master ]  # Run on pushes to main or master branch
+  pull_request:
+    branches: [ main, master ]  # Run on PRs to main or master branch
+  workflow_dispatch:  # Allow manual triggers from GitHub UI
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Your existing checkout step
+      # Check out the repository code
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for DVC to work properly
       
-      # Your existing Python setup
+      # Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Use the version you need
+          python-version: '3.10'
       
       # Install dependencies
       - name: Install dependencies
@@ -17,15 +29,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # Add this step - Install your package in development mode
+      # Install your package in development mode
       - name: Install package in development mode
         run: pip install -e .
       
-      # Your DVC setup and running steps
+      # Configure DVC
+      - name: Configure DVC
+        run: |
+          pip install dvc dvc-s3
+          # Add any DVC remote setup here if needed
+      
+      # Pull DVC data (if needed)
+      - name: Pull DVC data
+        run: dvc pull
+        env:
+          # Add any environment variables needed for DVC remote
+          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      # Run DVC pipeline
       - name: Run DVC pipeline
         run: dvc repro
 
-        
+
       # - name: Run model tests
       #   env:
       #     CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
