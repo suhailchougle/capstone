@@ -213,3 +213,5 @@ models/*.pkl
 
 # Don't ignore DVC files
 !models/*.dvc
+# Ignore output report files
+reports/*.json
