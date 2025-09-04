@@ -8,6 +8,11 @@ import os
 import mlflow
 from mlflow.models import infer_signature
 
+# Import dagshub conditionally to avoid errors in GitHub Actions
+try:
+    import dagshub
+except ImportError:
+    pass
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
@@ -46,60 +51,71 @@ def save_model(model, file_path: str) -> None:
 
 def main():
     try:
-        # Configure MLflow to use relative paths
-        if 'GITHUB_ACTIONS' in os.environ:
-            # In GitHub Actions, use a temp directory for MLflow artifacts
-            mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI', 'https://dagshub.com/sc/capstone.mlflow'))
-            # Set a temporary directory for local artifacts
-            os.environ['MLFLOW_TRACKING_URI_ARTIFACT_LOCATION'] = '/tmp/mlflow-artifacts'
-            os.makedirs('/tmp/mlflow-artifacts', exist_ok=True)
-        else:
-            # For local development
+        # Configure MLflow
+        dagshub_token = os.getenv("CAPSTONE_TEST")
+        
+        if dagshub_token:
+            # If running in a GitHub Action or environment with token
+            print("Using DagsHub token for authentication")
+            os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+            os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
             mlflow.set_tracking_uri('https://dagshub.com/sc/capstone.mlflow')
-            dagshub.init(repo_owner='sc', repo_name='capstone_repo', mlflow=True)
-        
-        # Load and prepare data
-        train_data = load_data('./data/processed/train_bow.csv')
-        X_train = train_data.iloc[:, :-1].values
-        y_train = train_data.iloc[:, -1].values
-        
-        # Create X_train as DataFrame for signature inference
-        X_train_df = train_data.iloc[:, :-1]
+            
+            # Load and prepare data
+            train_data = load_data('./data/processed/train_bow.csv')
+            X_train = train_data.iloc[:, :-1].values
+            y_train = train_data.iloc[:, -1].values
+            
+            # Create X_train as DataFrame for signature inference
+            X_train_df = train_data.iloc[:, :-1]
 
-        # Train model
-        clf = train_model(X_train, y_train)
-        
-        # Save model locally
-        save_model(clf, os.path.join('models', 'model.pkl'))
-        
-        # Generate model signature for better documentation
-        signature = infer_signature(X_train_df, clf.predict(X_train_df))
-        
-        # Start MLflow run
-        with mlflow.start_run(run_name="sentiment_classifier_training") as run:
-            # Log model parameters
-            mlflow.log_param("C", 1)
-            mlflow.log_param("solver", "liblinear")
-            mlflow.log_param("penalty", "l2")
+            # Train model
+            clf = train_model(X_train, y_train)
             
-            # Log the model
-            mlflow.sklearn.log_model(
-                clf, 
-                "model",
-                signature=signature
-            )
+            # Save model locally
+            save_model(clf, os.path.join('models', 'model.pkl'))
             
-            # Register the model in Model Registry
-            model_uri = f"runs:/{run.info.run_id}/model"
-            registered_model = mlflow.register_model(
-                model_uri=model_uri,
-                name="sentiment_classifier"
-            )
+            # Generate model signature for better documentation
+            signature = infer_signature(X_train_df, clf.predict(X_train_df))
             
-            logging.info(f"Model registered with name: {registered_model.name}, version: {registered_model.version}")
-            print(f"Model registered with name: {registered_model.name}")
-            print(f"Model version: {registered_model.version}")
-            print(f"View in Model Registry: https://dagshub.com/sc/capstone_repo.mlflow/#/models/{registered_model.name}")
+            # Start MLflow run
+            with mlflow.start_run(run_name="sentiment_classifier_training") as run:
+                # Log model parameters
+                mlflow.log_param("C", 1)
+                mlflow.log_param("solver", "liblinear")
+                mlflow.log_param("penalty", "l2")
+                
+                # Log the model
+                mlflow.sklearn.log_model(
+                    clf, 
+                    "model",
+                    signature=signature
+                )
+                
+                # Register the model in Model Registry
+                model_uri = f"runs:/{run.info.run_id}/model"
+                registered_model = mlflow.register_model(
+                    model_uri=model_uri,
+                    name="sentiment_classifier"
+                )
+                
+                logging.info(f"Model registered with name: {registered_model.name}, version: {registered_model.version}")
+                print(f"Model registered with name: {registered_model.name}")
+                print(f"Model version: {registered_model.version}")
+                print(f"View in Model Registry: https://dagshub.com/sc/capstone_repo.mlflow/#/models/{registered_model.name}")
+        else:
+            # If token is not available, just train and save the model locally
+            print("DagsHub token not found - skipping MLflow tracking")
+            train_data = load_data('./data/processed/train_bow.csv')
+            X_train = train_data.iloc[:, :-1].values
+            y_train = train_data.iloc[:, -1].values
+            
+            # Train model
+            clf = train_model(X_train, y_train)
+            
+            # Save model locally
+            save_model(clf, os.path.join('models', 'model.pkl'))
+            print("Model trained and saved locally without MLflow tracking")
 
     except Exception as e:
         logging.error('Failed to complete the model building process: %s', e)
