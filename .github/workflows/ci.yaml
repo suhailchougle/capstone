@@ -1,36 +1,31 @@
-name: CI Pipeline
-
-on: push
-
 jobs:
-  project-testing:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: checkout code
-        uses: actions/checkout@v3
-
-      - name: setup python
-        uses: actions/setup-python@v2
+      # Your existing checkout step
+      - uses: actions/checkout@v3
+      
+      # Your existing Python setup
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: install dependencies
+          python-version: '3.10'  # Use the version you need
+      
+      # Install dependencies
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+      
+      # Add this step - Install your package in development mode
+      - name: Install package in development mode
+        run: pip install -e .
+      
+      # Your DVC setup and running steps
+      - name: Run DVC pipeline
+        run: dvc repro
 
-      - name: run pipeline
-        run: |
-          dvc repro
-
+        
       # - name: Run model tests
       #   env:
       #     CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
