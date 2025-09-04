@@ -1,0 +1,12 @@
+creation_timestamp: 1756804384788
+current_stage: None
+description: null
+last_updated_timestamp: 1756804384788
+name: sentiment_classifier
+run_id: d3d25637fc3142bbbddbc621a067a4c3
+run_link: null
+source: file:///C:/Users/SohailChougle/Files/capstone/mlruns/0/d3d25637fc3142bbbddbc621a067a4c3/artifacts/model
+status: READY
+status_message: null
+user_id: null
+version: 1
