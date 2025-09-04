@@ -1,8 +1,6 @@
-# updated dvc.yaml
-
 stages:
   data_ingestion:
-    cmd: python src/data/data_ingestion.py
+    cmd: PYTHONPATH=. python src/data/data_ingestion.py
     deps:
     - src/data/data_ingestion.py
     params:
@@ -11,7 +9,7 @@ stages:
     - data/raw
 
   data_preprocessing:
-    cmd: python src/data/data_preprocessing.py
+    cmd: PYTHONPATH=. python src/data/data_preprocessing.py
     deps:
     - data/raw
     - src/data/data_preprocessing.py
@@ -19,7 +17,7 @@ stages:
     - data/interim
 
   feature_engineering:
-    cmd: python src/features/feature_engineering.py
+    cmd: PYTHONPATH=. python src/features/feature_engineering.py
     deps:
     - data/interim
     - src/features/feature_engineering.py
@@ -30,7 +28,7 @@ stages:
     - models/vectorizer.pkl
 
   model_building:
-    cmd: python src/model/model_building.py
+    cmd: PYTHONPATH=. python src/model/model_building.py
     deps:
     - data/processed
     - src/model/model_building.py
@@ -38,17 +36,17 @@ stages:
     - models/model.pkl
 
   model_evaluation:
-    cmd: python src/model/model_evaluation.py
+    cmd: PYTHONPATH=. python src/model/model_evaluation.py
     deps:
     - models/model.pkl
     - src/model/model_evaluation.py
     metrics:
     - reports/metrics.json
     outs:
-    - reports/experiment_info.json  # Add the model_info.json file as an output
+    - reports/experiment_info.json
 
   model_registration:
-    cmd: python src/model/register_model.py
+    cmd: PYTHONPATH=. python src/model/register_model.py
     deps:
     - reports/experiment_info.json
     - src/model/register_model.py
