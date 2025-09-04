@@ -20,9 +20,9 @@ load_dotenv()
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
 # To this:
-dagshub_token = os.getenv("CAPSTONE_TEST_DAGSHUB")
+dagshub_token = os.getenv("CASPTONE_TEST_DAGSHUB")
 if not dagshub_token:
-    raise EnvironmentError("CAPSTONE_TEST_DAGSHUB environment variable is not set")
+    raise EnvironmentError("CASPTONE_TEST_DAGSHUB environment variable is not set")
 os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 

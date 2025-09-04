@@ -52,7 +52,7 @@ def save_model(model, file_path: str) -> None:
 def main():
     try:
         # Configure MLflow
-        dagshub_token = os.getenv("CAPSTONE_TEST")
+        dagshub_token = os.getenv("CASPTONE_TEST_DAGSHUB")
         
         if dagshub_token:
             # If running in a GitHub Action or environment with token
