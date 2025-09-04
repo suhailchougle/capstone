@@ -46,6 +46,18 @@ def save_model(model, file_path: str) -> None:
 
 def main():
     try:
+        # Configure MLflow to use relative paths
+        if 'GITHUB_ACTIONS' in os.environ:
+            # In GitHub Actions, use a temp directory for MLflow artifacts
+            mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI', 'https://dagshub.com/sc/capstone.mlflow'))
+            # Set a temporary directory for local artifacts
+            os.environ['MLFLOW_TRACKING_URI_ARTIFACT_LOCATION'] = '/tmp/mlflow-artifacts'
+            os.makedirs('/tmp/mlflow-artifacts', exist_ok=True)
+        else:
+            # For local development
+            mlflow.set_tracking_uri('https://dagshub.com/sc/capstone.mlflow')
+            dagshub.init(repo_owner='sc', repo_name='capstone_repo', mlflow=True)
+        
         # Load and prepare data
         train_data = load_data('./data/processed/train_bow.csv')
         X_train = train_data.iloc[:, :-1].values
@@ -58,7 +70,7 @@ def main():
         clf = train_model(X_train, y_train)
         
         # Save model locally
-        save_model(clf, 'models/model.pkl')
+        save_model(clf, os.path.join('models', 'model.pkl'))
         
         # Generate model signature for better documentation
         signature = infer_signature(X_train_df, clf.predict(X_train_df))
@@ -69,10 +81,6 @@ def main():
             mlflow.log_param("C", 1)
             mlflow.log_param("solver", "liblinear")
             mlflow.log_param("penalty", "l2")
-            
-            # Log model metrics - you can add validation metrics here
-            # For example, if you had accuracy:
-            # mlflow.log_metric("accuracy", accuracy)
             
             # Log the model
             mlflow.sklearn.log_model(
@@ -85,7 +93,7 @@ def main():
             model_uri = f"runs:/{run.info.run_id}/model"
             registered_model = mlflow.register_model(
                 model_uri=model_uri,
-                name="sentiment_classifier"  # Choose an appropriate name
+                name="sentiment_classifier"
             )
             
             logging.info(f"Model registered with name: {registered_model.name}, version: {registered_model.version}")
